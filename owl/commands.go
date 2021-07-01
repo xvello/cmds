@@ -1,7 +1,6 @@
 package owl
 
 import (
-	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -26,7 +25,7 @@ func (c *bashAliasesCmd) Run(o *Owl, cmds interface{}) error {
 		for _, tag := range strings.Split(argTags, ",") {
 			if strings.HasPrefix(tag, "subcommand:") {
 				name := strings.TrimPrefix(tag, "subcommand:")
-				fmt.Printf("alias %s=\"%s %s\"\n", name, binary, name)
+				o.printf("alias %s=\"%s %s\"\n", name, binary, name)
 			}
 		}
 	}

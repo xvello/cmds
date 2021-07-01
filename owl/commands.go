@@ -9,9 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type buildAliasesCmd struct{}
+// ExtraCommands registers additional subcommands that can be helpful:
+type ExtraCommands struct {
+	Aliases *bashAliasesCmd `arg:"subcommand:bash-aliases" help:"generate bash aliases for all subcommands"`
+}
 
-func (c *buildAliasesCmd) Run(o *Owl, cmds interface{}) error {
+type bashAliasesCmd struct{}
+
+func (c *bashAliasesCmd) Run(o *Owl, cmds interface{}) error {
 	binary, err := os.Executable()
 	require.NoError(o, err, "cannot find current binary path")
 

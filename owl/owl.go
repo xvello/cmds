@@ -11,8 +11,7 @@ import (
 
 // Owl provides helpers to quickly bootstrap a multi-command binary
 type Owl struct {
-	Aliases *buildAliasesCmd `arg:"subcommand:build-aliases"`
-	Verbose bool             `arg:"-v" help:"display full errors"`
+	Verbose bool `arg:"-v" help:"display full errors"`
 }
 
 type simpleRunnable interface {

@@ -4,7 +4,8 @@ import "github.com/xvello/cmds/owl"
 
 type cmds struct {
 	owl.Owl
-	NewPr *NewPrCmd `arg:"subcommand:npr"`
+	owl.ExtraCommands
+	NewPr *NewPrCmd `arg:"subcommand:npr" help:"create and push a new branch with unstaged changes"`
 }
 
 func main() {

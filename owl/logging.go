@@ -9,6 +9,7 @@ import (
 )
 
 var (
+	//nolint:gosimple
 	testifyDetection     = regexp.MustCompile("^\\s+Error Trace:")
 	testifyMessageMarker = regexp.MustCompile("\n\\s+Messages:")
 	errorLogger          = log.New(os.Stderr, " ERROR: ", 0)

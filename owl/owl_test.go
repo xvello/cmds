@@ -115,3 +115,17 @@ func TestBadCommand(t *testing.T) {
 	require.Equal(t, " ERROR: command does not implement Run()\n", c.stderr.String())
 	require.True(t, c.triggeredFailNow)
 }
+
+func TestSetupOwl(t *testing.T) {
+	c := &struct {
+		Base
+		Simple *simpleSub `arg:"subcommand:simple"`
+	}{}
+	os.Args = []string{"owl", "simple"}
+	RunOwl(c)
+	require.Equal(t, c.stderr, os.Stderr)
+	require.Equal(t, c.stdout, os.Stdout)
+	require.False(t, c.IsVerbose())
+	require.False(t, c.mockFailNow)
+	require.False(t, c.triggeredFailNow)
+}

@@ -57,6 +57,7 @@ func TestErrorf(t *testing.T) {
 			}
 			RunOwl(c)
 
+			assert.Equal(t, tc.verbose, c.IsVerbose())
 			assert.Empty(t, c.stdout.String())
 			assert.Equal(t, tc.expectFailNow, c.triggeredFailNow)
 			if tc.expected != "" {

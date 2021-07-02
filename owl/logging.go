@@ -15,7 +15,7 @@ var (
 
 // Errorf is provided for compatibility with testify/require, it will print the errors to stderr.
 // Unless verbose is set, testify messages are detected and shortened to the message line only.
-func (o *Owl) Errorf(format string, args ...interface{}) {
+func (o *Base) Errorf(format string, args ...interface{}) {
 	message := fmt.Sprintf(strings.TrimPrefix(format, "\n"), args...)
 	if !o.Verbose && testifyDetection.MatchString(message) {
 		if pos := testifyMessageMarker.FindStringIndex(message); len(pos) == 2 {
@@ -26,7 +26,7 @@ func (o *Owl) Errorf(format string, args ...interface{}) {
 }
 
 // FailNow is provided for compatibility with testify/require, program will exit with code 1
-func (o *Owl) FailNow() {
+func (o *Base) FailNow() {
 	if o.mockFailNow {
 		o.triggeredFailNow = true
 	} else {
@@ -34,7 +34,7 @@ func (o *Owl) FailNow() {
 	}
 }
 
-// printf wraps fnt.Printf to a configurable stdout, to enable unit testing
-func (o *Owl) printf(format string, a ...interface{}) {
+// Printf wraps fnt.Printf to a configurable stdout, to enable unit testing
+func (o *Base) Printf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.stdout, format, a...)
 }

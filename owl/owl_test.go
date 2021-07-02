@@ -1,6 +1,7 @@
 package owl
 
 import (
+	"errors"
 	"os"
 	"strings"
 	"testing"
@@ -12,7 +13,7 @@ func buildTestCommand() *testCommand {
 	var stdout strings.Builder
 	var stderr strings.Builder
 	return &testCommand{
-		Owl: Owl{
+		Base: Base{
 			stdout:      &stdout,
 			stderr:      &stderr,
 			mockFailNow: true,
@@ -23,17 +24,17 @@ func buildTestCommand() *testCommand {
 }
 
 type testCommand struct {
-	Owl
-	ExtraCommands
+	Base
+	Extras
 	Simple   *simpleSub        `arg:"subcommand:simple"`
-	Advanced *advancedSub      `arg:"subcommand:another"`
+	Fallible *fallibleSub      `arg:"subcommand:another"`
 	Bad      *badSub           `arg:"subcommand:bad"`
 	Custom   *customFuncSubCmd `arg:"subcommand:custom"`
 
 	passed   bool
 	stdout   *strings.Builder
 	stderr   *strings.Builder
-	customFn func(*Owl)
+	customFn func(Owl)
 }
 
 type simpleSub struct {
@@ -41,21 +42,24 @@ type simpleSub struct {
 	called bool
 }
 
-func (t *simpleSub) Run(_ *Owl) error {
+func (t *simpleSub) Run(_ Owl) {
 	t.called = true
-	return nil
 }
 
-type advancedSub struct {
+type fallibleSub struct {
 	Name   string `arg:"positional"`
+	Fail   bool
 	called bool
 }
 
-func (t *advancedSub) Run(_ *Owl, cmds interface{}) error {
-	if c, ok := cmds.(*testCommand); ok {
+func (t *fallibleSub) Run(o Owl) error {
+	if c, ok := o.(*testCommand); ok {
 		c.passed = true
 	}
 	t.called = true
+	if t.Fail {
+		return errors.New("I failed")
+	}
 	return nil
 }
 
@@ -63,33 +67,44 @@ type badSub struct{}
 
 type customFuncSubCmd struct{}
 
-func (c *customFuncSubCmd) Run(o *Owl, root interface{}) error {
-	r, ok := root.(*testCommand)
+func (c *customFuncSubCmd) Run(o Owl) error {
+	r, ok := o.(*testCommand)
 	require.True(o, ok, "wrong root cmd type")
 	r.customFn(o)
 	return nil
 }
 
 func TestSimpleCommand(t *testing.T) {
-	c := &testCommand{}
+	c := buildTestCommand()
 	os.Args = []string{"owl", "simple", "--option"}
 	RunOwl(c)
+	require.False(t, c.triggeredFailNow)
 	require.NotNil(t, c.Simple)
 	require.True(t, c.Simple.called)
 	require.True(t, c.Simple.Option)
-	require.Nil(t, c.Advanced)
+	require.Nil(t, c.Fallible)
 	require.False(t, c.passed)
 }
 
-func TestAdvancedCommand(t *testing.T) {
-	c := &testCommand{}
+func TestFallibleCommand_Ok(t *testing.T) {
+	c := buildTestCommand()
 	os.Args = []string{"owl", "another", "gopher"}
 	RunOwl(c)
-	require.NotNil(t, c.Advanced)
-	require.True(t, c.Advanced.called)
-	require.Equal(t, "gopher", c.Advanced.Name)
+	require.False(t, c.triggeredFailNow)
+	require.NotNil(t, c.Fallible)
+	require.True(t, c.Fallible.called)
+	require.Equal(t, "gopher", c.Fallible.Name)
 	require.True(t, c.passed)
 	require.Nil(t, c.Simple)
+	require.Empty(t, c.stderr.String())
+}
+
+func TestFallibleCommand_Err(t *testing.T) {
+	c := buildTestCommand()
+	os.Args = []string{"owl", "another", "--fail", "gopher"}
+	RunOwl(c)
+	require.True(t, c.triggeredFailNow)
+	require.True(t, strings.HasSuffix(c.stderr.String(), "\tI failed\n"))
 }
 
 func TestBadCommand(t *testing.T) {

@@ -14,7 +14,7 @@ type NewPrCmd struct {
 	DryRun bool   `arg:"-n" help:"checkout and commit, but don't push'"`
 }
 
-func (c *NewPrCmd) Run(o *owl.Owl) error {
+func (c *NewPrCmd) Run(o owl.Owl) {
 	require.NotEmpty(o, c.Branch, "empty branch name")
 
 	// Ensure we have changes to commit
@@ -52,6 +52,4 @@ func (c *NewPrCmd) Run(o *owl.Owl) error {
 	} else {
 		o.Exec("git push")
 	}
-
-	return nil
 }

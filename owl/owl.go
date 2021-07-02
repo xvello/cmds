@@ -4,14 +4,25 @@ import (
 	"io"
 	"log"
 	"os"
-	"reflect"
 
 	"github.com/alexflint/go-arg"
 	"github.com/stretchr/testify/require"
 )
 
-// Owl provides helpers to quickly bootstrap a multi-command binary
-type Owl struct {
+// Owl provides helpers for your commands, see Base for documentation.
+// Commands can cast it to your root type to access global options.
+type Owl interface {
+	Errorf(format string, args ...interface{})
+	FailNow()
+	Printf(format string, a ...interface{})
+	IsVerbose() bool
+	Exec(command string, args ...string) string
+	getOwl() *Base
+}
+
+// Base provides the base logic to detect and run commands.
+// It must be embedded in your root command struct.
+type Base struct {
 	Verbose bool `arg:"-v" help:"display full errors"`
 
 	// Can be overridden for unit tests, defaults to os.StdOut/Err
@@ -24,28 +35,42 @@ type Owl struct {
 	triggeredFailNow bool
 }
 
+// IsVerbose returns true if the `--verbose` flag has been given.
+func (o *Base) IsVerbose() bool {
+	return o.Verbose
+}
+
+func (o *Base) getOwl() *Base {
+	return o
+}
+
+type fallibleRunnable interface {
+	Run(Owl) error
+}
+
 type simpleRunnable interface {
-	Run(*Owl) error
+	Run(Owl)
 }
 
-type advancedRunnable interface {
-	Run(*Owl, interface{}) error
-}
-
-// RunOwl is the entrypoint to call with your command struct.
+// RunOwl is the entrypoint to call with your root struct.
 // The arguments will be parsed and the relevant command called.
-func RunOwl(cmds interface{}) {
-	// Ensure the given struct embeds Owl and extract it
-	owlField := reflect.ValueOf(cmds).Elem().FieldByName("Owl")
-	if !owlField.IsValid() {
-		log.Fatalf("type %s does not embed the Owl type", reflect.TypeOf(cmds))
+func RunOwl(root Owl) {
+	setupOwl(root)
+	parser := arg.MustParse(root)
+	if c, ok := parser.Subcommand().(fallibleRunnable); ok {
+		require.NoError(root, c.Run(root))
+	} else if c, ok := parser.Subcommand().(simpleRunnable); ok {
+		c.Run(root)
+	} else {
+		require.Empty(root, parser.SubcommandNames(), "command does not implement Run()")
+		parser.WriteUsage(os.Stdout)
 	}
-	owl, ok := owlField.Addr().Interface().(*Owl)
-	if !ok {
-		log.Fatalf("Owl field in type %s is not of type %s", reflect.TypeOf(cmds), reflect.TypeOf(new(Owl)))
-	}
+}
 
-	// Allow to direct these to buffers for unit tests
+// setupOwl sets the required pointer members if they are not set.
+// This allows unit tests to override these for behaviour assertions.
+func setupOwl(root Owl) {
+	owl := root.getOwl()
 	if owl.stderr == nil {
 		owl.stderr = os.Stderr
 	}
@@ -54,16 +79,5 @@ func RunOwl(cmds interface{}) {
 	}
 	if owl.logger == nil {
 		owl.logger = log.New(owl.stderr, " ERROR: ", 0)
-	}
-
-	// Parse arguments and run a command
-	parser := arg.MustParse(cmds)
-	if c, ok := parser.Subcommand().(advancedRunnable); ok {
-		require.NoError(owl, c.Run(owl, cmds))
-	} else if c, ok := parser.Subcommand().(simpleRunnable); ok {
-		require.NoError(owl, c.Run(owl))
-	} else {
-		require.Empty(owl, parser.SubcommandNames(), "command does not implement Run()")
-		parser.WriteUsage(os.Stdout)
 	}
 }

@@ -11,7 +11,7 @@ import (
 // they are extracted from the command, by splitting it on spaces.
 // It the command fails, its output is printed and the command stops.
 // It the command succeeds, its output is returned as a string.
-func (o *Owl) Exec(command string, args ...string) string {
+func (o *Base) Exec(command string, args ...string) string {
 	if len(args) == 0 {
 		parts := strings.Split(command, " ")
 		command = parts[0]

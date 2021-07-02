@@ -15,14 +15,16 @@ func TestBashAliases(t *testing.T) {
 	var stdout strings.Builder
 	var stderr strings.Builder
 	c := &struct {
-		Owl
-		ExtraCommands
+		Base
+		Extras
 		Simple   *simpleSub   `arg:"subcommand:simple"`
-		Advanced *advancedSub `arg:"subcommand:another"`
-	}{Owl: Owl{
-		stdout: &stdout,
-		stderr: &stderr,
-	}}
+		Advanced *fallibleSub `arg:"subcommand:another"`
+	}{
+		Base: Base{
+			stdout: &stdout,
+			stderr: &stderr,
+		},
+	}
 
 	os.Args = []string{"owl", "bash-aliases"}
 	RunOwl(c)

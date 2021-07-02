@@ -50,6 +50,6 @@ func (c *NewPrCmd) Run(o owl.Owl) {
 	if c.DryRun {
 		fmt.Println("Dry-run mode: not pushing branch")
 	} else {
-		o.Exec("git push")
+		o.Printf(o.Exec("git push"))
 	}
 }

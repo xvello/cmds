@@ -1,3 +1,4 @@
+//go:generate mockery --disable-version-string --name Owl --case underscore
 package owl
 
 import (
@@ -17,7 +18,10 @@ type Owl interface {
 	Printf(format string, a ...interface{})
 	IsVerbose() bool
 	Exec(command string, args ...string) string
-	getOwl() *Base
+}
+
+type getOwlBase interface {
+	getOwlBase() *Base
 }
 
 // Base provides the base logic to detect and run commands.
@@ -40,7 +44,7 @@ func (o *Base) IsVerbose() bool {
 	return o.Verbose
 }
 
-func (o *Base) getOwl() *Base {
+func (o *Base) getOwlBase() *Base {
 	return o
 }
 
@@ -55,7 +59,9 @@ type simpleRunnable interface {
 // RunOwl is the entrypoint to call with your root struct.
 // The arguments will be parsed and the relevant command called.
 func RunOwl(root Owl) {
-	setupOwl(root)
+	if base, ok := root.(getOwlBase); ok {
+		setupOwlBase(base)
+	}
 	parser := arg.MustParse(root)
 	if c, ok := parser.Subcommand().(fallibleRunnable); ok {
 		require.NoError(root, c.Run(root))
@@ -69,8 +75,8 @@ func RunOwl(root Owl) {
 
 // setupOwl sets the required pointer members if they are not set.
 // This allows unit tests to override these for behaviour assertions.
-func setupOwl(root Owl) {
-	owl := root.getOwl()
+func setupOwlBase(root getOwlBase) {
+	owl := root.getOwlBase()
 	if owl.stderr == nil {
 		owl.stderr = os.Stderr
 	}

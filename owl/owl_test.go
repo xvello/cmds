@@ -3,9 +3,11 @@ package owl
 import (
 	"errors"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -128,4 +130,20 @@ func TestSetupOwl(t *testing.T) {
 	require.False(t, c.IsVerbose())
 	require.False(t, c.mockFailNow)
 	require.False(t, c.triggeredFailNow)
+}
+
+// TestInterfaceCoverage ensures all public methods of Base are exported in the Owl interface.
+func TestInterfaceCoverage(t *testing.T) {
+	concrete := reflect.TypeOf(new(Base))
+	iface := reflect.TypeOf((*Owl)(nil)).Elem()
+
+	// Check that method names match
+	for i := 0; i < concrete.NumMethod(); i++ {
+		name := concrete.Method(i).Name
+		_, found := iface.MethodByName(name)
+		assert.True(t, found, "Method %s not in interface", name)
+	}
+
+	// Check that method signatures match
+	assert.Implements(t, (*Owl)(nil), new(Base), "Method signatures don't match")
 }

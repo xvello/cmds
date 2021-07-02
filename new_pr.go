@@ -14,6 +14,11 @@ type NewPrCmd struct {
 	DryRun bool   `arg:"-n" help:"checkout and commit, but don't push'"`
 }
 
+var (
+	linearBranchPattern  = regexp.MustCompile("^[0-9]{3,}-[a-z][a-z0-9-]+$")
+	genericBranchPattern = regexp.MustCompile("^(feature|fix|devops)/[a-z][a-z0-9-]+$")
+)
+
 func (c *NewPrCmd) Run(o owl.Owl) {
 	require.NotEmpty(o, c.Branch, "empty branch name")
 
@@ -25,23 +30,8 @@ func (c *NewPrCmd) Run(o owl.Owl) {
 	defaultBranch := o.Exec("git rev-parse --abbrev-ref origin/HEAD")
 	require.Equal(o, strings.Split(defaultBranch, "/")[1], currentBranch, "not on default branch")
 
-	// Validate and prefix target branch name
-	name := c.Branch
-	validName := false
-	parts := strings.Split(name, "/")
-	switch len(parts) {
-	case 1:
-		if ok, _ := regexp.MatchString("^[0-9]{3,}-[a-z]+", name); ok {
-			name = "feature/big-" + name
-			validName = true
-		}
-	case 2:
-		switch parts[0] {
-		case "feature", "fix", "devops":
-			validName = true
-		}
-	}
-	require.True(o, validName, "invalid branch name: %s", name)
+	// Validate (and optionally prefix) target branch name
+	name := validateBranchName(o, c.Branch)
 
 	fmt.Printf("Creating and pushing new branch: %s\n", name)
 	o.Exec("git", "checkout", "-b", name)
@@ -52,4 +42,13 @@ func (c *NewPrCmd) Run(o owl.Owl) {
 	} else {
 		o.Printf(o.Exec("git push"))
 	}
+}
+
+func validateBranchName(o owl.Owl, name string) string {
+	if linearBranchPattern.MatchString(name) {
+		name = "feature/big-" + name
+	}
+	require.True(o, genericBranchPattern.MatchString(name),
+		"invalid branch name %s, must match %s", name, genericBranchPattern.String())
+	return name
 }

@@ -26,7 +26,7 @@ func TestBashAliases(t *testing.T) {
 		},
 	}
 
-	os.Args = []string{"owl", "bash-aliases"}
+	os.Args = []string{"owl", "build-bash-aliases"}
 	RunOwl(c)
 	assert.Empty(t, stderr.String())
 	assert.Equal(t, expected, stdout.String())

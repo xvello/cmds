@@ -10,7 +10,7 @@ import (
 
 // Extras registers additional subcommands that can be helpful:
 type Extras struct {
-	Aliases *bashAliasesCmd `arg:"subcommand:bash-aliases" help:"generate bash aliases for all subcommands"`
+	Aliases *bashAliasesCmd `arg:"subcommand:build-bash-aliases" help:"generate bash aliases for all subcommands"`
 }
 
 type bashAliasesCmd struct{}

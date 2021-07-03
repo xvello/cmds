@@ -15,9 +15,8 @@ import (
 type Owl interface {
 	Errorf(format string, args ...interface{})
 	FailNow()
-	Printf(format string, a ...interface{})
 	IsVerbose() bool
-	Exec(command string, args ...string) string
+	Printf(format string, a ...interface{})
 }
 
 type getOwlBase interface {

@@ -17,27 +17,6 @@ func (_m *Owl) Errorf(format string, args ...interface{}) {
 	_m.Called(_ca...)
 }
 
-// Exec provides a mock function with given fields: command, args
-func (_m *Owl) Exec(command string, args ...string) string {
-	_va := make([]interface{}, len(args))
-	for _i := range args {
-		_va[_i] = args[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, command)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
-
-	var r0 string
-	if rf, ok := ret.Get(0).(func(string, ...string) string); ok {
-		r0 = rf(command, args...)
-	} else {
-		r0 = ret.Get(0).(string)
-	}
-
-	return r0
-}
-
 // FailNow provides a mock function with given fields:
 func (_m *Owl) FailNow() {
 	_m.Called()

@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 	"github.com/xvello/cmds/owl"
+	"github.com/xvello/cmds/owl/must"
 )
 
 type NewPrCmd struct {
@@ -23,24 +24,24 @@ func (c *NewPrCmd) Run(o owl.Owl) {
 	require.NotEmpty(o, c.Branch, "empty branch name")
 
 	// Ensure we have changes to commit
-	require.NotEmpty(o, o.Exec("git diff --shortstat HEAD"), "no changes to commit")
+	require.NotEmpty(o, must.Exec(o, "git diff --shortstat HEAD"), "no changes to commit")
 
 	// Ensure we are on the default branch
-	currentBranch := o.Exec("git rev-parse --abbrev-ref HEAD")
-	defaultBranch := o.Exec("git rev-parse --abbrev-ref origin/HEAD")
+	currentBranch := must.Exec(o, "git rev-parse --abbrev-ref HEAD")
+	defaultBranch := must.Exec(o, "git rev-parse --abbrev-ref origin/HEAD")
 	require.Equal(o, strings.Split(defaultBranch, "/")[1], currentBranch, "not on default branch")
 
 	// Validate (and optionally prefix) target branch name
 	name := validateBranchName(o, c.Branch)
 
 	fmt.Printf("Creating and pushing new branch: %s\n", name)
-	o.Exec("git", "checkout", "-b", name)
-	o.Exec("git", "commit", "-a", "-m", name)
+	must.Exec(o, "git", "checkout", "-b", name)
+	must.Exec(o, "git", "commit", "-a", "-m", name)
 
 	if c.DryRun {
 		fmt.Println("Dry-run mode: not pushing branch")
 	} else {
-		o.Printf(o.Exec("git push"))
+		o.Printf(must.Exec(o, "git push"))
 	}
 }
 

@@ -43,3 +43,10 @@ func (_m *Owl) Printf(format string, a ...interface{}) {
 	_ca = append(_ca, a...)
 	_m.Called(_ca...)
 }
+
+// Println provides a mock function with given fields: a
+func (_m *Owl) Println(a ...interface{}) {
+	var _ca []interface{}
+	_ca = append(_ca, a...)
+	_m.Called(_ca...)
+}

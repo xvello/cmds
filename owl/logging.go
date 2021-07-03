@@ -38,3 +38,8 @@ func (o *Base) FailNow() {
 func (o *Base) Printf(format string, a ...interface{}) {
 	_, _ = fmt.Fprintf(o.stdout, format, a...)
 }
+
+// Println wraps fnt.Println to a configurable stdout, to enable unit testing
+func (o *Base) Println(a ...interface{}) {
+	_, _ = fmt.Fprintln(o.stdout, a...)
+}

@@ -17,6 +17,7 @@ type Owl interface {
 	FailNow()
 	IsVerbose() bool
 	Printf(format string, a ...interface{})
+	Println(a ...interface{})
 }
 
 type getOwlBase interface {

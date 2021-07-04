@@ -26,7 +26,9 @@ func TestExpectAssertFailure(t *testing.T) {
 func TestExpectRequireFailure(t *testing.T) {
 	mowl := new(Owl)
 	mowl.ExpectRequireFailure(t, assertionFailureMessage)
-	require.Equal(mowl, 1, 2, assertionFailureMessage)
+	require.Panics(t, func() {
+		require.Equal(mowl, 1, 2, assertionFailureMessage)
+	})
 	mock.AssertExpectationsForObjects(t, mowl)
 }
 

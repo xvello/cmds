@@ -34,9 +34,8 @@ type Base struct {
 	stderr io.Writer
 	logger *log.Logger
 
-	// To test FailNow
-	mockFailNow      bool
-	triggeredFailNow bool
+	// Used in internal unit tests
+	propagateFailNow bool
 }
 
 // IsVerbose returns true if the `--verbose` flag has been given.
@@ -61,6 +60,13 @@ type simpleRunnable interface {
 func RunOwl(root Owl) {
 	if base, ok := root.(getOwlBase); ok {
 		setupOwlBase(base)
+		if !base.getOwlBase().propagateFailNow {
+			defer func() {
+				if r := recover(); r == errFailNow {
+					os.Exit(1)
+				}
+			}()
+		}
 	}
 	parser := arg.MustParse(root)
 	if c, ok := parser.Subcommand().(fallibleRunnable); ok {

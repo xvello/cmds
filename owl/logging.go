@@ -1,8 +1,8 @@
 package owl
 
 import (
+	"errors"
 	"fmt"
-	"os"
 	"regexp"
 	"strings"
 )
@@ -25,13 +25,11 @@ func (o *Base) Errorf(format string, args ...interface{}) {
 	o.logger.Println(strings.TrimSpace(message))
 }
 
-// FailNow is provided for compatibility with testify/require, program will exit with code 1
+var errFailNow = errors.New("FailNow called by subcommand")
+
+// FailNow is provided for compatibility with testify/require, a panic will trigger an exit with code 1
 func (o *Base) FailNow() {
-	if o.mockFailNow {
-		o.triggeredFailNow = true
-	} else {
-		os.Exit(1)
-	}
+	panic(errFailNow)
 }
 
 // Printf wraps fnt.Printf to a configurable stdout, to enable unit testing

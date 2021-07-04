@@ -41,7 +41,7 @@ func TestExec(t *testing.T) {
 			mowl := new(mocks.Owl)
 			if tc.expectFail != "" {
 				mowl.ExpectRequireFailure(t, tc.expectFail)
-				Exec(mowl, tc.command, tc.args...)
+				assert.Panics(t, func() { Exec(mowl, tc.command, tc.args...) })
 			} else {
 				assert.Equal(t, tc.expectedOut, Exec(mowl, tc.command, tc.args...))
 			}

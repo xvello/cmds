@@ -25,7 +25,7 @@ func TestValidateBranchName(t *testing.T) {
 				assert.Equal(t, output, validateBranchName(mowl, input))
 			} else {
 				mowl.ExpectRequireFailure(t, "invalid branch name "+input)
-				validateBranchName(mowl, input)
+				assert.Panics(t, func() { validateBranchName(mowl, input) })
 			}
 			mock.AssertExpectationsForObjects(t, mowl)
 		})

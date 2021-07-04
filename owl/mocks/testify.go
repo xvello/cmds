@@ -19,5 +19,5 @@ func (_m *Owl) ExpectAssertFailure(t *testing.T, contains string) {
 // ExpectRequireFailure configures the mock to expect a testify/require failure containing the given string
 func (_m *Owl) ExpectRequireFailure(t *testing.T, contains string) {
 	_m.ExpectAssertFailure(t, contains)
-	_m.On("FailNow").Return()
+	_m.On("FailNow").Panic("FailNow called by subcommand")
 }

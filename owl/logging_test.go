@@ -55,11 +55,15 @@ func TestErrorf(t *testing.T) {
 			if tc.verbose {
 				os.Args = append(os.Args, "--verbose")
 			}
-			RunOwl(c)
 
+			if tc.expectFailNow {
+				require.Panics(t, func() { RunOwl(c) })
+			} else {
+				require.NotPanics(t, func() { RunOwl(c) })
+			}
 			assert.Equal(t, tc.verbose, c.IsVerbose())
 			assert.Empty(t, c.stdout.String())
-			assert.Equal(t, tc.expectFailNow, c.triggeredFailNow)
+
 			if tc.expected != "" {
 				assert.Equal(t, tc.expected, c.stderr.String())
 			}

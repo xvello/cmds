@@ -18,7 +18,7 @@ func buildTestCommand() *testCommand {
 		Base: Base{
 			stdout:      &stdout,
 			stderr:      &stderr,
-			mockFailNow: true,
+			propagateFailNow: true,
 		},
 		stdout: &stdout,
 		stderr: &stderr,
@@ -44,7 +44,8 @@ type simpleSub struct {
 	called bool
 }
 
-func (t *simpleSub) Run(_ Owl) {
+func (t *simpleSub) Run(o Owl) {
+	o.Println("hello")
 	t.called = true
 }
 
@@ -79,11 +80,12 @@ func (c *customFuncSubCmd) Run(o Owl) error {
 func TestSimpleCommand(t *testing.T) {
 	c := buildTestCommand()
 	os.Args = []string{"owl", "simple", "--option"}
-	RunOwl(c)
-	require.False(t, c.triggeredFailNow)
+	require.NotPanics(t, func() { RunOwl(c) })
+
 	require.NotNil(t, c.Simple)
 	require.True(t, c.Simple.called)
 	require.True(t, c.Simple.Option)
+	require.Equal(t, "hello\n", c.stdout.String())
 	require.Nil(t, c.Fallible)
 	require.False(t, c.passed)
 }
@@ -91,8 +93,8 @@ func TestSimpleCommand(t *testing.T) {
 func TestFallibleCommand_Ok(t *testing.T) {
 	c := buildTestCommand()
 	os.Args = []string{"owl", "another", "gopher"}
-	RunOwl(c)
-	require.False(t, c.triggeredFailNow)
+	require.NotPanics(t, func() { RunOwl(c) })
+
 	require.NotNil(t, c.Fallible)
 	require.True(t, c.Fallible.called)
 	require.Equal(t, "gopher", c.Fallible.Name)
@@ -104,18 +106,16 @@ func TestFallibleCommand_Ok(t *testing.T) {
 func TestFallibleCommand_Err(t *testing.T) {
 	c := buildTestCommand()
 	os.Args = []string{"owl", "another", "--fail", "gopher"}
-	RunOwl(c)
-	require.True(t, c.triggeredFailNow)
+	require.Panics(t, func() { RunOwl(c) })
 	require.True(t, strings.HasSuffix(c.stderr.String(), "\tI failed\n"))
 }
 
 func TestBadCommand(t *testing.T) {
 	c := buildTestCommand()
 	os.Args = []string{"owl", "bad"}
-	RunOwl(c)
+	require.Panics(t, func() { RunOwl(c) })
 	require.Empty(t, c.stdout.String())
 	require.Equal(t, " ERROR: command does not implement Run()\n", c.stderr.String())
-	require.True(t, c.triggeredFailNow)
 }
 
 func TestSetupOwl(t *testing.T) {
@@ -128,8 +128,7 @@ func TestSetupOwl(t *testing.T) {
 	require.Equal(t, c.stderr, os.Stderr)
 	require.Equal(t, c.stdout, os.Stdout)
 	require.False(t, c.IsVerbose())
-	require.False(t, c.mockFailNow)
-	require.False(t, c.triggeredFailNow)
+	require.False(t, c.propagateFailNow)
 }
 
 // TestInterfaceCoverage ensures all public methods of Base are exported in the Owl interface.

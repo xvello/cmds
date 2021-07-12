@@ -25,7 +25,7 @@ func (c *bashAliasesCmd) Run(o Owl) error {
 		for _, tag := range strings.Split(argTags, ",") {
 			if strings.HasPrefix(tag, "subcommand:") {
 				name := strings.TrimPrefix(tag, "subcommand:")
-				o.Printf("alias %s=\"%s %s\"\n", name, binary, name)
+				o.Printf("alias %s='%s %s'\n", name, binary, name)
 			}
 		}
 	}

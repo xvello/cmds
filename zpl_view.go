@@ -15,10 +15,7 @@ import (
 	"github.com/xvello/cmds/owl/must"
 )
 
-var (
-	labelPrefix  = []byte("^XA")
-	base64Prefix = []byte("XlhB") // base64 for `^XA`
-)
+var labelPrefix = []byte("^XA")
 
 type ZplViewCmd struct {
 	Contents string `arg:"positional" help:"ZPL contents to render, can be base64 encoded"`
@@ -27,16 +24,16 @@ type ZplViewCmd struct {
 func (c *ZplViewCmd) Run(o owl.Owl) {
 	require.NotEmpty(o, c.Contents, "empty zpl contents")
 
-	// Detect and decode base64 encoding
+	// Search for ^XA start command, optionally decode base64
 	contents := []byte(c.Contents)
-	if bytes.HasPrefix(contents, base64Prefix) {
-		var err error
-		contents, err = base64.StdEncoding.DecodeString(c.Contents)
-		require.NoError(o, err)
+	if bytes.HasPrefix(bytes.TrimSpace(contents), labelPrefix) {
+		// Nothing to do here
+	} else if decoded, err := base64.StdEncoding.DecodeString(c.Contents);
+		err == nil && bytes.HasPrefix(bytes.TrimSpace(decoded), labelPrefix) {
+		contents = decoded
+	} else {
+		require.FailNow(o, "cannot find ZPL start command", "invalid ZPL data, should start with %s", labelPrefix)
 	}
-
-	// Look for "begin label" ZPL command
-	require.True(o, bytes.HasPrefix(bytes.TrimSpace(contents), labelPrefix), "invalid ZPL data, should start with %s", labelPrefix)
 
 	// Render to multi-page PDF using the labelary web service
 	req, err := http.NewRequest(http.MethodPost, "http://api.labelary.com/v1/printers/8dpmm/labels/4x8/", bytes.NewReader(contents))

@@ -37,12 +37,11 @@ func (c *NewPrCmd) Run(o owl.Owl) {
 	fmt.Printf("Creating and pushing new branch: %s\n", name)
 	must.Exec(o, "git", "checkout", "-b", name)
 	must.Exec(o, "git", "commit", "-a", "-m", name)
-	must.Exec(o, "git", "branch", "--set-upstream-to=origin/"+name, name)
 
 	if c.DryRun {
 		fmt.Println("Dry-run mode: not pushing branch")
 	} else {
-		o.Printf(must.Exec(o, "git push"))
+		o.Println(must.Exec(o, "git", "push", "--set-upstream", "origin", name))
 	}
 }
 

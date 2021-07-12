@@ -36,7 +36,7 @@ func (c *ZplViewCmd) Run(o owl.Owl) {
 	}
 
 	// Look for "begin label" ZPL command
-	require.True(o, bytes.HasPrefix(contents, labelPrefix), "invalid ZPL data, should start with %s", labelPrefix)
+	require.True(o, bytes.HasPrefix(bytes.TrimSpace(contents), labelPrefix), "invalid ZPL data, should start with %s", labelPrefix)
 
 	// Render to multi-page PDF using the labelary web service
 	req, err := http.NewRequest(http.MethodPost, "http://api.labelary.com/v1/printers/8dpmm/labels/4x8/", bytes.NewReader(contents))

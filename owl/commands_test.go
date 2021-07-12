@@ -11,7 +11,7 @@ import (
 
 func TestBashAliases(t *testing.T) {
 	executable, _ := os.Executable()
-	expected := fmt.Sprintf("alias simple=\"%s simple\"\nalias another=\"%s another\"\n", executable, executable)
+	expected := fmt.Sprintf(aliasesPreamble+"alias simple='%[1]s simple'\nalias another='%[1]s another'\n", executable)
 	var stdout strings.Builder
 	var stderr strings.Builder
 	c := &struct {

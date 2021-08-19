@@ -14,7 +14,7 @@ type rootCommand struct {
 	owl.Base
 	Lower   *lowerCmd `arg:"subcommand:lower" help:"return the text in lowercase"`
 	Upper   *upperCmd `arg:"subcommand:upper" help:"return the text in uppercase"`
-	Reverse bool `help:"the result will be reversed (left to right)"`
+	Reverse bool      `help:"the result will be reversed (left to right)"`
 }
 
 type lowerCmd struct {

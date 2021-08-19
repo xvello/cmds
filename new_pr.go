@@ -20,7 +20,7 @@ type NewPrCmd struct {
 var (
 	linearBranchPattern  = regexp.MustCompile("^[0-9]{3,}-[a-z][a-z0-9-]+$")
 	genericBranchPattern = regexp.MustCompile("^(feature|fix|devops)/[a-z][a-z0-9-]+$")
-	githubRemotePattern  = regexp.MustCompile("git@github.com:([[:word:]]+\\/[[:word:]]+).git")
+	githubRemotePattern  = regexp.MustCompile(`git@github.com:([[:word:]]+\/[[:word:]]+).git`)
 	githubOpenPRURL      = "https://github.com/%s/compare/%s?expand=1"
 )
 

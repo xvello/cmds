@@ -16,8 +16,8 @@ func buildTestCommand() *testCommand {
 	var stderr strings.Builder
 	return &testCommand{
 		Base: Base{
-			stdout:      &stdout,
-			stderr:      &stderr,
+			stdout:           &stdout,
+			stderr:           &stderr,
 			propagateFailNow: true,
 		},
 		stdout: &stdout,

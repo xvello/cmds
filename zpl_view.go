@@ -28,8 +28,7 @@ func (c *ZplViewCmd) Run(o owl.Owl) {
 	contents := []byte(c.Contents)
 	if bytes.HasPrefix(bytes.TrimSpace(contents), labelPrefix) {
 		// Nothing to do here
-	} else if decoded, err := base64.StdEncoding.DecodeString(c.Contents);
-		err == nil && bytes.HasPrefix(bytes.TrimSpace(decoded), labelPrefix) {
+	} else if decoded, err := base64.StdEncoding.DecodeString(c.Contents); err == nil && bytes.HasPrefix(bytes.TrimSpace(decoded), labelPrefix) {
 		contents = decoded
 	} else {
 		require.FailNow(o, "cannot find ZPL start command", "invalid ZPL data, should start with %s", labelPrefix)

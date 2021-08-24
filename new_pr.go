@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/stretchr/testify/require"
-	"github.com/xvello/cmds/owl"
-	"github.com/xvello/cmds/owl/must"
+	"github.com/xvello/owl"
+	"github.com/xvello/owl/must"
 )
 
 type NewPrCmd struct {

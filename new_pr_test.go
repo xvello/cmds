@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"github.com/xvello/cmds/owl/mocks"
+	"github.com/xvello/owl/mocks"
 )
 
 func TestValidateBranchName(t *testing.T) {

@@ -9,8 +9,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/xvello/cmds/owl"
-	"github.com/xvello/cmds/owl/must"
+	"github.com/xvello/owl"
+	"github.com/xvello/owl/must"
 	"golang.org/x/mod/semver"
 )
 
